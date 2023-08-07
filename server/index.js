@@ -8,8 +8,15 @@ import helmet from 'helmet'; // là một middleware bảo mật cho ứng dụn
 import morgan from 'morgan'; // là một middleware ghi lại (logging) cho ứng dụng Express trong Node.js. Nó giúp ghi lại thông tin về các yêu cầu HTTP và phản hồi tương ứng để theo dõi và gỡ lỗi ứng dụng.
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { verifyToken } from './middleware/auth.js';
 import { register } from './controllers/auth.js';
+import { createPost } from './controllers/posts.js';
 import authRoutes from './routes/auth.js';
+import userRoutes from './routes/users.js';
+import postRoutes from './routes/posts.js';
+import { users, posts } from './data/index.js';
+import User from './models/Users.js';
+import Post from './models/Post.js';
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url); // chỉ sử dụng trên module: "type": "module",
@@ -38,10 +45,15 @@ const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
 app.post('/auth/register', upload.single('picture'), register);
+app.post('/posts', verifyToken, upload.single('picture'), createPost);
 
 /* ROUTES */
 // [GET]: /auth/login
 app.use('/auth', authRoutes);
+// [GET]: /users/:id
+app.use('/users', userRoutes);
+// [GET]: /users/:id
+app.use('/posts', postRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;
@@ -53,5 +65,9 @@ mongoose
     })
     .then(() => {
         app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+
+        /* ADD DATA ONE TIME */
+        // User.insertMany(users);
+        // Post.insertMany(posts);
     })
     .catch((error) => console.log(`${error} did not connect`));
