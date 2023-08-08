@@ -5,7 +5,6 @@ export const verifyToken = async (req, res, next) => {
     try {
         // Chỉ có khi token đã được tạo sẵn khi login
         let token = req.header('Authorization');
-        console.log(token);
         if (!token) {
             return res.status(403).send('Access Denied');
         }
