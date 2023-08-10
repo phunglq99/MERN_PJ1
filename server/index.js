@@ -52,7 +52,7 @@ app.post('/posts', verifyToken, upload.single('picture'), createPost);
 app.use('/auth', authRoutes);
 // [GET]: /users/:id
 app.use('/users', userRoutes);
-// [GET]: /users/:id
+// [GET]: /posts/:userId/posts
 app.use('/posts', postRoutes);
 
 /* MONGOOSE SETUP */
