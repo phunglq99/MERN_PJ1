@@ -6,7 +6,6 @@ import {
     FormControl,
     IconButton,
     InputBase,
-    Menu,
     MenuItem,
     Select,
     Typography,
@@ -20,7 +19,8 @@ import {
     LightMode,
     Message,
     Notifications,
-    Search
+    Search,
+    Menu
 } from '@mui/icons-material';
 import { setMode, setLogout } from 'state';
 import FlexBetween from 'components/FlexBetween';
