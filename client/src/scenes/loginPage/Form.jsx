@@ -6,11 +6,15 @@ import {
     useMediaQuery,
     useTheme
 } from '@mui/material';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import Dropzone from 'react-dropzone';
+import FlexBetween from 'components/FlexBetween';
+import { setLogin } from 'state';
 
 const registerSchema = yup.object().shape({
     firstName: yup.string().required('required'),
@@ -51,7 +55,56 @@ const Form = () => {
     const isLogin = pageType === 'login';
     const isRegister = pageType === 'register';
 
-    const handleFormSubmit = async (values, onSubmitProps) => {};
+    const register = async (values, onSubmitProps) => {
+        // this allows us to send form info with image
+        const formData = new FormData();
+        for (let value in values) {
+            formData.append(value, values[value]);
+        }
+        formData.append('picturePath', values.picture.name);
+
+        const saveUserResponse = await fetch(
+            'http://localhost:3001/auth/register',
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+        const saveUser = await saveUserResponse.json();
+        onSubmitProps.resetForm();
+
+        if (saveUser) {
+            setPageType('login');
+        }
+    };
+
+    const login = async (values, onSubmitProps) => {
+        const loggedInResponse = await fetch(
+            'http://localhost:3001/auth/login',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values)
+            }
+        );
+
+        const loggedIn = await loggedInResponse.json();
+        onSubmitProps.resetForm();
+        if (loggedIn) {
+            dispatch(
+                setLogin({
+                    user: loggedIn.user,
+                    token: loggedIn.token
+                })
+            );
+            navigate('/home');
+        }
+    };
+
+    const handleFormSubmit = async (values, onSubmitProps) => {
+        if (isRegister) await register(values, onSubmitProps);
+        if (isLogin) await login(values, onSubmitProps);
+    };
 
     return (
         <Formik
@@ -83,8 +136,8 @@ const Form = () => {
                                 <TextField
                                     label="First Name"
                                     onBlur={handleBlur}
-                                    onChange={handleBlur}
-                                    value={values.firstName}
+                                    onChange={handleChange}
+                                    value={values.firstName || ''}
                                     name="firstName"
                                     error={
                                         Boolean(touched.firstName) &&
@@ -95,6 +148,93 @@ const Form = () => {
                                     }
                                     sx={{ gridColumn: 'span 2' }}
                                 />
+                                <TextField
+                                    label="Last Name"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.lastName || ''}
+                                    name="lastName"
+                                    error={
+                                        Boolean(touched.lastName) &&
+                                        Boolean(errors.lastName)
+                                    }
+                                    helperText={
+                                        touched.lastName && errors.lastName
+                                    }
+                                    sx={{ gridColumn: 'span 2' }}
+                                />
+                                <TextField
+                                    label="Location"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.location || ''}
+                                    name="location"
+                                    error={
+                                        Boolean(touched.location) &&
+                                        Boolean(errors.location)
+                                    }
+                                    helperText={
+                                        touched.location && errors.location
+                                    }
+                                    sx={{ gridColumn: 'span 4' }}
+                                />
+                                <TextField
+                                    label="Occupation"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.occupation || ''}
+                                    name="occupation"
+                                    error={
+                                        Boolean(touched.occupation) &&
+                                        Boolean(errors.occupation)
+                                    }
+                                    helperText={
+                                        touched.occupation && errors.occupation
+                                    }
+                                    sx={{ gridColumn: 'span 4' }}
+                                />
+                                <Box
+                                    gridColumn="span 4"
+                                    border={`1px solid ${palette.neutral.medium}`}
+                                    borderRadius="5px"
+                                    p="1rem">
+                                    <Dropzone
+                                        acceptedFiles=".jpg,.jpeg,.png"
+                                        multiple={false}
+                                        onDrop={(acceptedFiles) =>
+                                            setFieldValue(
+                                                'picture',
+                                                acceptedFiles[0]
+                                            )
+                                        }>
+                                        {({ getRootProps, getInputProps }) => (
+                                            <Box
+                                                {...getRootProps()}
+                                                border={`2px dashed ${palette.primary.main}`}
+                                                p="1rem"
+                                                sx={{
+                                                    '&:hover': {
+                                                        cursor: 'pointer'
+                                                    }
+                                                }}>
+                                                <input {...getInputProps()} />
+                                                {!values.picture ? (
+                                                    <p>Add Picture Here</p>
+                                                ) : (
+                                                    <FlexBetween>
+                                                        <Typography>
+                                                            {
+                                                                values.picture
+                                                                    .name
+                                                            }
+                                                        </Typography>
+                                                        <EditOutlinedIcon />
+                                                    </FlexBetween>
+                                                )}
+                                            </Box>
+                                        )}
+                                    </Dropzone>
+                                </Box>
                             </>
                         )}
 
