@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 
-const UserWidget = () => {
+const UserWidget = ({ userId }) => {
     return <Box>UserWidget</Box>;
 };
 
